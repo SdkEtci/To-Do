@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Kullanıcı Oluştur</title>
+</head>
+<body>
+  <h2>Kullanıcı Oluştur</h2>
+  <input id="name" placeholder="Ad">
+  <input id="email" placeholder="Email">
+  <button onclick="kullaniciOlustur()">Oluştur</button>
+
+  <script>
+    const API = "http://localhost:5000"; // Backend API adresi
+
+    async function kullaniciOlustur() {
+      const name = document.getElementById("name").value;
+      const email = document.getElementById("email").value;
+
+      const res = await fetch(API + "/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email })
+      });
+
+      if (res.ok) {
+        const user = await res.json();
+        alert(`Kullanıcı başarıyla oluşturuldu: ${user.name}`);
+      } else {
+        alert("Kullanıcı eklenemedi.");
+      }
+    }
+  </script>
+</body>
+</html>
