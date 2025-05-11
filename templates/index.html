@@ -271,6 +271,35 @@
         </div>
     </div>
 
+    <!-- Edit User Modal -->
+    <div class="modal fade" id="editUserModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit User</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editUserForm">
+                        <input type="hidden" id="editUserId">
+                        <div class="mb-3">
+                            <label for="editUserName" class="form-label">Name</label>
+                            <input type="text" class="form-control" id="editUserName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editUserEmail" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="editUserEmail" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="saveUserBtn">Save changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         // Fetch and display users
@@ -507,6 +536,58 @@
             document.getElementById('filterStatus').value = '';
             document.getElementById('filterUser').value = '';
             fetchTasks();
+        }
+
+        // Edit user
+        function editUser(userId, name, email) {
+            document.getElementById('editUserId').value = userId;
+            document.getElementById('editUserName').value = name;
+            document.getElementById('editUserEmail').value = email;
+            new bootstrap.Modal(document.getElementById('editUserModal')).show();
+        }
+
+        // Save edited user
+        document.getElementById('saveUserBtn').addEventListener('click', async () => {
+            const userId = document.getElementById('editUserId').value;
+            const userData = {
+                name: document.getElementById('editUserName').value,
+                email: document.getElementById('editUserEmail').value
+            };
+
+            try {
+                const response = await fetch(`/users/${userId}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(userData),
+                });
+
+                if (response.ok) {
+                    bootstrap.Modal.getInstance(document.getElementById('editUserModal')).hide();
+                    fetchUsers();
+                }
+            } catch (error) {
+                console.error('Error updating user:', error);
+            }
+        });
+
+        // Delete user
+        async function deleteUser(userId) {
+            if (confirm('Are you sure you want to delete this user? This will also delete all associated tasks.')) {
+                try {
+                    const response = await fetch(`/users/${userId}`, {
+                        method: 'DELETE',
+                    });
+
+                    if (response.ok) {
+                        fetchUsers();
+                        fetchTasks(); // Refresh tasks as well since some might be deleted
+                    }
+                } catch (error) {
+                    console.error('Error deleting user:', error);
+                }
+            }
         }
 
         // Initial load
